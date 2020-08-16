@@ -2,10 +2,12 @@
 using Markdig;
 using Markdig.Parsers;
 using Markdig.Renderers;
+using System;
 using System.IO;
 using System.Linq;
 using Xunit;
 using Core = MarkdigEmbeddedGistExtension.Core;
+using HtmlAgilityPack;
 
 namespace MarkdigEmbeddedGistExtension.Core.Tests
 {
@@ -68,6 +70,27 @@ namespace MarkdigEmbeddedGistExtension.Core.Tests
 
             _result.Trim().Should().NotBe($"<p>{_renderFragment}</p>");
             _result.Trim().Should().NotContain(_renderFragment);
+        }
+
+        [Fact]
+        public void RendersParsedHtml()
+        {
+            string _markdown = $"[file://{Directory.GetCurrentDirectory()}/gist.js]";
+            var _pipeline = new MarkdownPipelineBuilder()
+                .UseEmbeddedGists(config =>
+                {
+                    config.AddBaseUrl("file://");
+                }).Build();
+            _pipeline.Setup(_renderer);
+
+            var _html = Markdown.ToHtml(_markdown, _pipeline);
+            var _result = new HtmlDocument();
+            _result.LoadHtml($"<!DOCTYPE html><html><body>{_html}</body></html>");
+
+            _html.Trim().Should().NotContain("document.write");
+            _result.DocumentNode.SelectNodes("//p/link").Count().Should().Be(1);
+            _result.DocumentNode.SelectSingleNode("//p/link").Attributes["test-attribute"].Value.Should().Be("confirmed");
+            _result.GetElementbyId("file-test-gist-LC1").InnerText.Should().Be("This is a test gist");
         }
     }
 }
