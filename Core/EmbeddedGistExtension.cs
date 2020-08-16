@@ -6,11 +6,23 @@ namespace MarkdigEmbeddedGistExtension.Core
 {
     public class EmbeddedGistExtension : IMarkdownExtension
     {
+        private EmbeddedGistConfiguration _configuration;
+        
+        public EmbeddedGistExtension()
+        {
+            _configuration = new EmbeddedGistConfiguration();
+        }
+
+        public EmbeddedGistExtension(EmbeddedGistConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public void Setup(MarkdownPipelineBuilder pipeline)
         {
             if (!pipeline.InlineParsers.Contains<EmbeddedGistInlineParser>())
             {
-                pipeline.InlineParsers.InsertBefore<LinkInlineParser>(new EmbeddedGistInlineParser());
+                pipeline.InlineParsers.InsertBefore<LinkInlineParser>(new EmbeddedGistInlineParser(_configuration));
             }
         }
 
@@ -19,7 +31,7 @@ namespace MarkdigEmbeddedGistExtension.Core
             var _htmlRenderer = renderer as HtmlRenderer;
             if (_htmlRenderer != null && !_htmlRenderer.ObjectRenderers.Contains<EmbeddedGistRenderer>())
             {
-                _htmlRenderer.ObjectRenderers.Add(new EmbeddedGistRenderer());
+                _htmlRenderer.ObjectRenderers.Add(new EmbeddedGistRenderer(_configuration));
             }
         }
     }
