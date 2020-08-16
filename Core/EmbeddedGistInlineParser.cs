@@ -40,7 +40,7 @@ namespace MarkdigEmbeddedGistExtension.Core
             _end = _start;
             _current = slice.NextChar();
 
-            if (_current != ']')
+            while (_current != ']')
             {
                 _url += _current;
                 _end = slice.Start;
