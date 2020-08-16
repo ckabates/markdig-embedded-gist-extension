@@ -1,8 +1,6 @@
 ﻿using Markdig;
+using Markdig.Parsers.Inlines;
 using Markdig.Renderers;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MarkdigEmbeddedGistExtension.Core
 {
@@ -10,12 +8,19 @@ namespace MarkdigEmbeddedGistExtension.Core
     {
         public void Setup(MarkdownPipelineBuilder pipeline)
         {
-            throw new NotImplementedException();
+            if (!pipeline.InlineParsers.Contains<EmbeddedGistInlineParser>())
+            {
+                pipeline.InlineParsers.InsertBefore<LinkInlineParser>(new EmbeddedGistInlineParser());
+            }
         }
 
         public void Setup(MarkdownPipeline pipeline, IMarkdownRenderer renderer)
         {
-            throw new NotImplementedException();
+            var _htmlRenderer = renderer as HtmlRenderer;
+            if (_htmlRenderer != null && !_htmlRenderer.ObjectRenderers.Contains<EmbeddedGistRenderer>())
+            {
+                _htmlRenderer.ObjectRenderers.Add(new EmbeddedGistRenderer());
+            }
         }
     }
 }
